@@ -1,0 +1,223 @@
+# Robert Swain's jury
+
+In 1963, a court in Talladega County, Alabama convicted a young black man
+called Robert Swain sentenced him to death. He appealed his sentence, citing
+among other factors the all-white jury. At the time, only men aged 21 or older
+were allowed to serve on juries in Talladega County. In the county, 26% of the
+eligible jurors were black, but there were only 8 black men among the 100
+selected for the jury panel in Swain's trial.  The jury results from
+a selection process from the jury panel. No black man was selected for the
+trial jury.
+
+In 1965, the Supreme Court of the United States [denied Swain's
+appeal](https://en.wikipedia.org/wiki/Swain_v._Alabama). In its ruling, the
+Court wrote "... the overall percentage disparity has been small and reflects
+no studied attempt to include or exclude a specified number of Negroes."
+
+The grounds of the appeal were that the jury *panel* (8 of 100 black men) was not representative of the population of the country, as was required by law.
+
+Here we investigate the *jury* (0 out of 12) black men.  Is 0 out 12 a surprising number?   If we took a random sample of 12 people from a population where 26% of them were black, how often would we see no black people in the sample of 12?
+
+
+We need to work out some way of simulating the process of taking a random
+person from a population where there is a 26% chance of the person being
+black.
+
+If there was a 50% chance that the person was black, then we could do a coin toss to decide if our simulated juror was black. We might decide that heads means a black juror, and tails means a white juror.
+
+If there was a 25% chance, then we could do two coin tosses.  We could decided that two heads meant a black juror, and one or zero heads means a white juror.
+
+For 26%, we need something with a finer grain.
+
+One way is to take random numbers between 0 and 1.  We could say that we have
+a black juror if the number is less than 0.26 (which will happen 26% of the
+time).
+
+Here's how to get a random number between 0 and 1.
+
+We can run this cell a few times to show that we get different numbers, between 0 and 1.
+
+```{r}
+runif(1)
+```
+
+Read `runif` as *random uniform* - a random number that is equally (uniformly)
+likely to be any value from 0 through 1.
+
+We are going to need to store this number for later use.  We can do that by attaching a label to it, such as "juror".  Then we can refer to the number by its label.  This is like a register in a calculator, or a cell in an Excel spreadsheet (A1, B9 etc would be the labels).
+
+```{r}
+juror <- runif(1)
+juror
+```
+
+Now we need to decide if the number is less than 0.26.  If so our simulation
+has found a black juror, otherwise we have a white juror.
+
+```{r}
+juror < 0.26
+```
+
+Let's put those two lines of code together, to make a new random number, and then check if it is less than 0.26.  We can run this a few times to see that we get `TRUE` about 26% of the time.
+
+```{r}
+juror <- runif(1)
+juror < 0.26
+```
+
+Of course we could run the cell above 12 times, and write down how many `TRUE`
+values we see, but we'd like the computer to automate that for us.  In fact, we
+can ask the computer to make 12 random numbers at once, like this:
+
+```{r}
+jurors <- runif(12)
+jurors
+```
+
+And we can ask whether each of these numbers is less than 0.26, all in one go, like this:
+
+```{r}
+jurors <- runif(12)
+jurors < 0.26
+```
+
+The comparison returns a sequence of 12 `TRUE` or `FALSE` values, where the
+`TRUE` values correspond to random numbers that were less than 0.26, and the
+`FALSE` values correspond to numbers that were greater than or equal to 0.26.
+
+Then, the `TRUE` and `FALSE` values indicate a black juror and a white juror respectively.
+
+We might want to make a label for this set of 12 `TRUE` and `FALSE` values,
+like this:
+
+```{r}
+jurors <- runif(10)
+is_black <- jurors < 0.26
+is_black
+```
+
+The `is_black` label points to 12 values which can be either `TRUE` or `FALSE`.  The `TRUE` values correspond to a black juror.  We want to count how many black jurors we found, which means counting the number of `TRUE` values.  We can do this with the `sum` function, like this:
+
+```{r}
+sum(is_black)
+```
+
+`sum` works here because `sum` considers `TRUE` to be equal to 1, and `FALSE` to be equal to 0:
+
+```{r}
+sum(TRUE)
+sum(FALSE)
+```
+
+We pull these three lines together to make a single cell to make a jury of 12
+people, decide if each juror is black or white, and count the number of
+simulated black jurors.
+
+We can run this a few times to get an idea of how many times we see the value 0 (no black jurors in the jury of 12):
+
+```{r}
+jurors < runif(12)
+is_black <- jurors < 0.26
+sum(is_black)
+```
+
+Rather than repeat these steps manually, we'd like the computer to do that for
+us.
+
+Let's say we want to repeat these steps 10 times, to make 10 simulated juries.
+
+We can first make a sequence of 10 values of 0, to store our counts.  When we
+have finished all our steps below, the first value will be the count of black
+jurors in the first jury we simulated, the second will be the count of black
+jurors in the second sample we simulated, and so on.
+
+```{r}
+counts <- numeric(10)
+counts
+```
+
+Now we use *loop* to repeat the steps above 10 times, and record the count of
+black jurors for each of these 10 simulated juries.
+
+```{r}
+counts <- numeric(10)
+for (i in 1:10) {
+    # Repeating the steps to simulated a jury.
+    jurors <- runif(12)
+    is_black <- jurors < 0.26
+    # Store the count of black jurors for this jury.
+    counts[i] <- sum(is_black)
+}  # The end of the loop.
+counts
+```
+
+How many of these 10 juries had 0 black jurors?
+
+The other way to ask this, is how may of the sequence of values in `counts` is
+equal to 0.
+
+We can ask which values are equal to 0 like this:
+
+```{r}
+counts == 0
+```
+
+Now we have 10 `TRUE` or `FALSE` values where the `TRUE` values correspond to
+counts that were equal to 0.
+
+The result in this case depends on our random numbers, but it turns out a count
+of 0 is a pretty rare value in these simulated juries, so there may well be no
+`TRUE` values in `counts == 0` above.
+
+We can ask how many of the counts were equal to 0, like this:
+
+```{r}
+sum(counts == 0)
+```
+
+Now we have everything we need to do a much larger simulation.  We can simulate
+10000 juries, in the blink of an eye.
+
+```{r}
+# Make 10000 zeros, to store the counts for our 10000 juries.
+counts <- numeric(10000)
+for (i in 1:10000) {
+    # Repeating the steps to simulated a jury.
+    jurors <- runif(12)
+    is_black <- jurors < 0.26
+    # Store the count of black jurors for this jury.
+    counts[i] <- sum(is_black)
+}  # The end of the loop.
+counts
+```
+
+We can do a histogram of the counts, to see which counts are common, and which are less common.
+
+```{r}
+hist(counts, xlab='Number of black jurors')
+```
+
+It looks like 0 is fairly uncommon.   How uncommon is it, exactly?
+
+Here we count how many of the 10000 juries had exactly 0 black jurors:
+
+```{r}
+n_with_0_black <- sum(counts == 0)
+n_with_0_black
+```
+
+What is the chance that any one jury will have 0 black jurors?  It is just the
+number of simulations that generated that result, divided by the total number
+of simulations.
+
+```{r}
+n_with_0_black / 10000
+```
+
+This implies that 0 is a fairly unusual number of black jurors, given our
+model.
+
+Our model was that the jury members were chosen at random from the population
+where 26% were black.
+
+Maybe our model is wrong?  Maybe the jury members were not chosen at random?
